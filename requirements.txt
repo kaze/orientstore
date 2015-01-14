@@ -1,0 +1,2 @@
+pyorient==1.2.3
+schematics==1.0-0
