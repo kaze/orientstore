@@ -28,43 +28,44 @@ class OrientStore(object):
 
     def create_class_for(self, model):
 
-        try:
+        command = 'create class {} extends {}'.format(
+                model['name'],
+                model['parentclass']
+            )
 
-            command = 'create class {} extends {}'.format(
-                    model['name'],
-                    model['parentclass']
-                )
-
-            self.command(command)
-            print command
-
-        except PyOrientCommandException:
-
-            print e
+        self.command(command)
 
     def create_fields_for(self, model):
 
         for field in model['fields']:
 
-            try:
+            self.create_property(model_name=model['name'],
+                                 field_name=field['name'],
+                                 orient_type=field['orient_type'],
+                                 linked=field.get('linked', None))
 
-                command = 'create property {}.{} {}'.format(
-                    model['name'],
-                    field['name'],
-                    field['orient_type']
-                )
+    def create_property(self, model_name, field_name, orient_type=None, linked=None):
 
-                linked = field.get('linked', None)
+        command = 'create property {}.{}'.format(model_name, field_name)
 
-                if linked:
+        if orient_type:
 
-                    command = '{} {}'.format(command, linked)
+            command = '{} {}'.format(command, orient_type)
 
-                self.command(command)
+        if linked:
 
-            except PyOrientCommandException:
+            command = '{} {}'.format(command, linked)
 
-                print e
+        self.command(command)
+
+    def alter_property(self, model_name, field_name, attribute_name, attribute_value):
+
+        command = 'alter property {}.{} {} {}'.format(model_name,
+                                                      field_name,
+                                                      attribute_name,
+                                                      attribute_value)
+
+        self.command(command)
 
     def create_index_for(self, model):
 
