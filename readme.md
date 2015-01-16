@@ -2,8 +2,6 @@ I'm just hacking on python and orientdb to see, how, and to what, could I use a 
 
 ## good to know
 
-This code is used with my own [`pyenv`](https://github.com/kaze/pyenv) to set and get variables from the environment. An example .env file is added to the repo
-
 I'm using the clever [`schematics`](https://github.com/schematics/schematics) module to describe my models. OrientStore automatically get the model names and their fields from the module, which contains them:
 
     OrientStore.register_model_module(module.submodule.models)
