@@ -1,122 +1,28 @@
 import json
-import re
 
 from pyorient.types import OrientRecordLink, OrientRecord
 from pyorient.exceptions import PyOrientCommandException
-from schematics.exceptions import ValidationError, ModelValidationError
-from schematics.datastructures import OrderedDict
-import schematics
+from schematics.exceptions import ModelValidationError
 
 from .client import OrientClient
+from .migrator import OrientMigrator
 
 
 class OrientStore(object):
 
     def __init__(self, config):
 
-        self.models = {}
         self.db_client = OrientClient(config).connect()
+        self.migrator = OrientMigrator(store=self)
 
-    def init_structure(self):
+    def init_database(self, model_module):
 
-        for m in self.models:
-
-            model = self.models[m]
-
-            self.create_class_for(model)
-            self.create_fields_for(model)
-
-    def create_class_for(self, model):
-
-        command = 'create class {} extends {}'.format(
-                model['name'],
-                model['parentclass']
-            )
-
-        self.command(command)
-
-    def create_fields_for(self, model):
-
-        for field in model['fields']:
-
-            self.create_property(model_name=model['name'],
-                                 field_name=field['name'],
-                                 orient_type=field['orient_type'],
-                                 linked=field.get('linked', None))
-
-    def create_property(self, model_name, field_name, orient_type=None, linked=None):
-
-        command = 'create property {}.{}'.format(model_name, field_name)
-
-        if orient_type:
-
-            command = '{} {}'.format(command, orient_type)
-
-        if linked:
-
-            command = '{} {}'.format(command, linked)
-
-        self.command(command)
-
-    def alter_property(self, model_name, field_name, attribute_name, attribute_value):
-
-        command = 'alter property {}.{} {} {}'.format(model_name,
-                                                      field_name,
-                                                      attribute_name,
-                                                      attribute_value)
-
-        self.command(command)
-
-    def create_index_for(self, model):
-
-        # CREATE INDEX <name> [ON <class-name> (prop-names)] <type> [<key-type>]
-        #   METADATA [{<json-metadata>}]
-
-        pass
-
-    def register_model_module(self, modelmodule):
-
-        newmodels = dict([(name, {'class':cls,
-                                  'name': name,
-                                  'parentclass':cls._parentclass}) \
-            for name, cls in modelmodule.__dict__.items() \
-                if isinstance(cls, type) \
-                    and type(cls) == schematics.models.ModelMeta
-        ])
-
-        self._collect_fields(newmodels)
-        self.models.update(newmodels)
-
-    def _collect_fields(self, models):
-
-        for model, attrs in models.items():
-
-            fields = []
-
-            for m in attrs['class']._fields.items():
-                orient_type = m[1].__class__.__name__.replace('Type','').upper()
-
-                if orient_type in ['URL', 'UUID', 'IPV4']:
-
-                    orient_type = 'STRING'
-
-                fields.append({'name': m[0],
-                               'type': m[1].__class__,
-                               'orient_type': orient_type})
-
-            attrs['fields'] = fields
-
-    def unregister_model(self, model_name):
-
-        del self.models[model_name]
-
-    def model_class_for(self, model_name):
-
-        return self.models[model_name]['class']
+        self.migrator.register_model_module(model_module)
+        self.migrator.init_structure()
 
     def to_model(self, model, orient_object):
 
-        model = self.model_class_for(model)()
+        model = self.migrator.model_class_for(model)()
         rid = orient_object.rid
 
         if rid:
@@ -180,7 +86,7 @@ class OrientStore(object):
 
     # create
     # ----------------------------------------------------------------------- #
-    def create(self, model, data):
+    def insert(self, model, data):
 
         # INSERT INTO [class:]<class>|cluster:<cluster>|index:<index>
         #   [(<field>[,]*) VALUES (<expression>[,]*)[,]*]|
@@ -189,7 +95,7 @@ class OrientStore(object):
         #   [RETURN <expression>]
         #   [FROM <query>]
 
-        item = self.model_class_for(model)(data)
+        item = self.migrator.model_class_for(model)(data)
 
         try:
 
