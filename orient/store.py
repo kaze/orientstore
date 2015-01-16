@@ -73,8 +73,8 @@ class OrientStore(object):
     def register_model_module(self, modelmodule):
 
         newmodels = dict([(name, {'class':selfp,
-                                   'name': name,
-                                   'parentclass':selfp._parentclass}) \
+                                  'name': name,
+                                  'parentclass':selfp._parentclass}) \
             for name, selfp in modelmodule.__dict__.items() \
                 if isinstance(selfp, type) \
                     and type(selfp) == schematics.models.ModelMeta
@@ -113,8 +113,13 @@ class OrientStore(object):
     def to_model(self, model, orient_object):
 
         model = self.model_class_for(model)()
-        model.rid = orient_object.__dict__['_OrientRecord__rid']
-        data_dict = orient_object.__dict__['_OrientRecord__o_storage']
+        rid = orient_object.rid
+
+        if rid:
+
+            model.rid = rid
+
+        data_dict = orient_object.oRecordData or {}
 
         for key, value in data_dict.items():
 
