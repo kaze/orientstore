@@ -27,6 +27,7 @@ class OrientStore(object):
             self.create_fields_for(model)
 
     def create_class_for(self, model):
+
         try:
 
             command = 'create class {} extends {}'.format(
@@ -66,18 +67,20 @@ class OrientStore(object):
                 print e
 
     def create_index_for(self, model):
+
         # CREATE INDEX <name> [ON <class-name> (prop-names)] <type> [<key-type>]
         #   METADATA [{<json-metadata>}]
+
         pass
 
     def register_model_module(self, modelmodule):
 
-        newmodels = dict([(name, {'class':selfp,
+        newmodels = dict([(name, {'class':cls,
                                   'name': name,
-                                  'parentclass':selfp._parentclass}) \
-            for name, selfp in modelmodule.__dict__.items() \
-                if isinstance(selfp, type) \
-                    and type(selfp) == schematics.models.ModelMeta
+                                  'parentclass':cls._parentclass}) \
+            for name, cls in modelmodule.__dict__.items() \
+                if isinstance(cls, type) \
+                    and type(cls) == schematics.models.ModelMeta
         ])
 
         self._collect_fields(newmodels)
@@ -158,21 +161,26 @@ class OrientStore(object):
     # traversal commands
     # ----------------------------------------------------------------------- #
     def traverse(self):
+
         # TRAVERSE <[class.]field>|*|any()|all()
         #           [FROM <target>]
         #           [LET <Assignment>*]
         #           WHILE <condition>
         #           [LIMIT <max-records>]
         #           [STRATEGY <strategy>]
+
         pass
 
     def find_references(self):
+
         # FIND REFERENCES <rid|(<sub-query>)> [class-list]
+
         pass
 
     # create
     # ----------------------------------------------------------------------- #
     def create(self, model, data):
+
         # INSERT INTO [class:]<class>|cluster:<cluster>|index:<index>
         #   [(<field>[,]*) VALUES (<expression>[,]*)[,]*]|
         #   [SET <field> = <expression>|<sub-command>[,]*]|
@@ -195,11 +203,13 @@ class OrientStore(object):
             return e.messages
 
     def create_link(self):
+
         # CREATE LINK <link-name>
         #   TYPE [<link-type>]
         #   FROM <source-class>.<source-property>
         #   TO <destination-class>.<destination-property>
         #   [INVERSE]
+
         pass
 
     # read
@@ -225,6 +235,7 @@ class OrientStore(object):
     # update
     # ----------------------------------------------------------------------- #
     def update(self, model, data):
+
         # UPDATE <class>|cluster:<cluster>|<recordID>
         #   [SET|INCREMENT|ADD|REMOVE|PUT <field-name> = <field-value>[,]*]|[CONTENT|MERGE <JSON>]
         #   [UPSERT]
@@ -232,21 +243,26 @@ class OrientStore(object):
         #   [WHERE <conditions>]
         #   [LOCK default|record]
         #   [LIMIT <max-records>] [TIMEOUT <timeout>]
+
         pass
 
     # delete
     # ----------------------------------------------------------------------- #
     def delete(self, model, rid): pass
 
-    def delete_vertext(self):
+    def delete_vertex(self):
+
         # DELETE VERTEX <rid>|<class>|FROM (<subquery>)
         #   [WHERE <conditions>]
         #   [LIMIT <MaxRecords>>]
+
         pass
 
     def delete_edge(self):
+
         # DELETE EDGE <rid>|FROM <rid>|TO <rid>|[<class>]
         #   [WHERE <conditions>]>
         #   [LIMIT <MaxRecords>]
+
         pass
 
