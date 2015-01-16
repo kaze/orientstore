@@ -3,8 +3,10 @@ import re
 from pyorient.types import OrientRecordLink
 from schematics.exceptions import ValidationError
 from schematics.types import (StringType, URLType, DateTimeType, DecimalType,
-                              LongType, IntType, EmailType, UUIDType, IPv4Type)
+                              LongType, IntType, EmailType, UUIDType, IPv4Type,
+                              BooleanType)
 from schematics.types.compound import ListType, ModelType
+from schematics.types.temporal import TimeStampType
 
 # schematics.types.base module
 # BaseType(TypeMeta('BaseTypeBase', (object, ), {}))
@@ -85,11 +87,6 @@ class EmbeddedMapType(ModelType):
 
 class LinkType(RIDType):
     pass
-    # def to_native(self, value):
-    #     return OrientRecordLink(value)
-
-    # def to_primitive(self, value):
-    #     return value.get_hash()
 
 
 class LinkListType(ListType):
