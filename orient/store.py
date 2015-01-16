@@ -135,15 +135,6 @@ class OrientStore(object):
 
         return model
 
-        # try:
-        #     if model.validate():
-
-        #         return model
-
-        # except ModelValidationError as e:
-
-        #     return e.messages
-
     def command(self, expression):
 
         try:
